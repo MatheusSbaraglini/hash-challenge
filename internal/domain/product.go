@@ -1,6 +1,7 @@
 package domain
 
 import (
+	"context"
 	"fmt"
 )
 
@@ -21,7 +22,7 @@ type ProductInput struct {
 
 func (pi *ProductInput) Validate() error {
 	for _, prd := range pi.Products {
-		if prd.Quantity == 0 {
+		if prd.Quantity <= 0 {
 			return fmt.Errorf("quantity should be greater than 0 for product ID: %d", prd.ID)
 		}
 	}
@@ -58,4 +59,8 @@ func (c *Checkout) CalculateAmounts() {
 	c.TotalAmountWithDiscount = totalAmount - totalDiscount
 	c.TotalDiscount = totalDiscount
 
+}
+
+type CheckoutService interface {
+	AddProducts(ctx context.Context, products *ProductInput) (*Checkout, error)
 }
