@@ -8,11 +8,13 @@ import (
 )
 
 type service struct {
+	productStorage domain.ProductStorage
 	log *log.Logger
 }
 
-func NewCheckoutService(log *log.Logger) domain.CheckoutService {
+func NewCheckoutService(productStorage domain.ProductStorage, log *log.Logger) domain.CheckoutService {
 	return &service{
+		productStorage: productStorage,
 		log: log,
 	}
 }
@@ -23,8 +25,13 @@ func (s *service) AddProducts(ctx context.Context, products *domain.ProductInput
 	}
 
 	for _, inputProduct := range products.Products {
+		// do not calc products with invalid quantity
+		if inputProduct.Quantity <= 0 {
+			continue
+		}
+
 		checkoutProduct := &domain.ProductCheckout{
-			ID: inputProduct.ID,
+			ID:       inputProduct.ID,
 			Quantity: inputProduct.Quantity,
 		}
 		// get product data by id
