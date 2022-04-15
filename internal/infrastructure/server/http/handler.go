@@ -4,13 +4,17 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/matheussbaraglini/hash-challenge/internal/domain"
 )
 
 type handler struct {
+	checkoutService domain.CheckoutService
 }
 
-func NewHandler() http.Handler {
-	handler := &handler{}
+func NewHandler(checkoutService domain.CheckoutService) http.Handler {
+	handler := &handler{
+		checkoutService: checkoutService,
+	}
 
 	gin.SetMode(gin.ReleaseMode)
 

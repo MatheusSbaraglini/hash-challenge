@@ -7,48 +7,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestProductInput_Validate(t *testing.T) {
-	t.Run("should validate successfully", func(t *testing.T) {
-		input := &domain.ProductInput{
-			Products: []struct {
-				ID       int `json:"id"`
-				Quantity int `json:"quantity"`
-			}{
-				{
-					ID:       1,
-					Quantity: 1,
-				},
-				{
-					ID:       2,
-					Quantity: 50,
-				},
-			},
-		}
-
-		assert.NoError(t, input.Validate())
-	})
-
-	t.Run("should return error when add a product with quantity 0", func(t *testing.T) {
-		input := &domain.ProductInput{
-			Products: []struct {
-				ID       int `json:"id"`
-				Quantity int `json:"quantity"`
-			}{
-				{
-					ID:       1,
-					Quantity: 1,
-				},
-				{
-					ID:       2,
-					Quantity: 0,
-				},
-			},
-		}
-
-		assert.EqualError(t, input.Validate(), "quantity should be greater than 0 for product ID: 2")
-	})
-}
-
 func TestCheckout_CalculateAmounts(t *testing.T) {
 	checkout := &domain.Checkout{
 		Products: []*domain.ProductCheckout{

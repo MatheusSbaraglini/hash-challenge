@@ -2,7 +2,6 @@ package domain
 
 import (
 	"context"
-	"fmt"
 )
 
 type Product struct {
@@ -18,16 +17,6 @@ type ProductInput struct {
 		ID       int `json:"id"`
 		Quantity int `json:"quantity"`
 	} `json:"products"`
-}
-
-func (pi *ProductInput) Validate() error {
-	for _, prd := range pi.Products {
-		if prd.Quantity <= 0 {
-			return fmt.Errorf("quantity should be greater than 0 for product ID: %d", prd.ID)
-		}
-	}
-
-	return nil
 }
 
 type ProductCheckout struct {
@@ -63,4 +52,9 @@ func (c *Checkout) CalculateAmounts() {
 
 type CheckoutService interface {
 	AddProducts(ctx context.Context, products *ProductInput) (*Checkout, error)
+}
+
+type ProductStorage interface {
+	FindOne(ctx context.Context, ID int) (*Product, error)
+	FindAllGifts(ctx context.Context) ([]*Product, error)
 }

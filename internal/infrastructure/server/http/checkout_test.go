@@ -15,7 +15,7 @@ import (
 
 func TestCheckout(t *testing.T) {
 	t.Run("should validate successfully", func(t *testing.T) {
-		server := httptest.NewServer(internalHTTP.NewHandler())
+		server := httptest.NewServer(internalHTTP.NewHandler(nil))
 		defer server.Close()
 
 		URL, _ := url.Parse(server.URL)
@@ -42,6 +42,7 @@ func TestCheckout(t *testing.T) {
 		assert.NoError(t, err)
 		assert.NotEmpty(t, bodyBytes)
 
+		// temp
 		expected := `
 		{
 			"products": [
