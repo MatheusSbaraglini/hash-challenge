@@ -4,6 +4,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/matheussbaraglini/hash-challenge/internal/domain/product"
 	"github.com/matheussbaraglini/hash-challenge/internal/infrastructure/server/http"
@@ -12,7 +13,10 @@ import (
 )
 
 const (
-	envVarServerPort = "SERVER_PORT"
+	dateLayout                 = "02/01/2006 15:04:05"
+	envVarServerPort           = "SERVER_PORT"
+	envVarStartDateBlackFriday = "START_DATE_BLACK_FRIDAY"
+	envVarEndDateBlackFriday   = "END_DATE_BLACK_FRIDAY"
 
 	defaultPort = "5001"
 )
@@ -20,14 +24,32 @@ const (
 func main() {
 	log := log.New(os.Stderr, "", log.LstdFlags)
 
+	if err := env.CheckRequired(*log, envVarStartDateBlackFriday, envVarEndDateBlackFriday); err != nil {
+		log.Fatal(err)
+	}
+
 	// Storage
 	productStorage, err := memory.NewMemoryProductStorage(getProductsFile())
 	if err != nil {
-		log.Fatalf("%v", err)
+		log.Fatal(err)
 	}
 
 	// Service
-	checkoutService := product.NewCheckoutService(productStorage, log)
+	funcNow := func() time.Time {
+		return time.Now()
+	}
+
+	blackFridayStart, err := time.ParseInLocation(dateLayout, getStartDateBlackFriday(), time.Local)
+	if err != nil {
+		log.Fatalf("invalid start date format: %v", err)
+	}
+
+	blackFridayEnd, err := time.ParseInLocation(dateLayout, getEndDateBlackFriday(), time.Local)
+	if err != nil {
+		log.Fatalf("invalid end date format: %v", err)
+	}
+
+	checkoutService := product.NewCheckoutService(productStorage, funcNow, blackFridayStart, blackFridayEnd, log)
 
 	// HTTP server
 	handler := http.NewHandler(checkoutService)
@@ -57,4 +79,12 @@ func getProductsFile() *os.File {
 
 func getServerPort() string {
 	return env.GetString(envVarServerPort, defaultPort)
+}
+
+func getStartDateBlackFriday() string {
+	return env.GetString(envVarStartDateBlackFriday)
+}
+
+func getEndDateBlackFriday() string {
+	return env.GetString(envVarEndDateBlackFriday)
 }
