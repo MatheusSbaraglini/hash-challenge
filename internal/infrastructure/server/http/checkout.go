@@ -14,6 +14,10 @@ func (h *handler) checkout(c *gin.Context) {
 	}
 
 	// add products
+	checkout, err := h.checkoutService.AddProducts(c, products)
+	if err != nil {
+		c.AbortWithStatus(http.StatusBadRequest)
+	}
 
-	c.JSON(http.StatusOK, products) // temp
+	c.JSON(http.StatusOK, checkout)
 }
