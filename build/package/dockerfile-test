@@ -1,0 +1,16 @@
+# --- Base ----
+FROM golang:1.15-stretch AS base
+WORKDIR $GOPATH/src/github.com.br/matheussbaraglini/hash-challenge
+
+# ---- Dependencies ----
+FROM base AS dependencies
+COPY go.mod .
+COPY go.sum .
+RUN go mod download
+
+# ---- Test ----
+FROM dependencies AS test
+COPY . .
+RUN go test -v -failfast -coverprofile=coverage.out ./...
+RUN grep -v "_mock" coverage.out >> filtered_coverage.out
+RUN go tool cover -func filtered_coverage.out

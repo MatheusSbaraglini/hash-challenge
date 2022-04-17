@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  checkout-server:
+    build:
+      context: ../../.
+      dockerfile: build/package/dockerfile
+      target: run
+    environment:
+      START_DATE_BLACK_FRIDAY: 10/04/2022 09:00:00
+      END_DATE_BLACK_FRIDAY: 11/04/2022 09:00:00
+    ports:
+      - "5001:5001"
+    restart: on-failure

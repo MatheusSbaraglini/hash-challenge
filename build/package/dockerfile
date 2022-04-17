@@ -1,0 +1,23 @@
+# --- Base ----
+FROM golang:1.15-stretch AS base
+WORKDIR $GOPATH/src/github.com.br/matheussbaraglini/hash-challenge
+
+# ---- Dependencies ----
+FROM base AS dependencies
+COPY go.mod .
+COPY go.sum .
+RUN go mod download
+
+# ---- Source ----
+FROM dependencies as source
+COPY . .
+
+# ---- Build ----
+FROM source as build
+RUN CGO_ENABLED=0 GOOS=linux \
+    go build -v -a -o ./hash-challenge \
+    ./cmd/hash-challenge/main.go
+
+# ---- Running ----
+FROM build as run
+CMD ["./hash-challenge"]
