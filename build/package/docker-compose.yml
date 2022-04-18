@@ -15,8 +15,8 @@ services:
       dockerfile: build/package/dockerfile
       target: run
     environment:
-      START_DATE_BLACK_FRIDAY: 10/04/2022 09:00:00
-      END_DATE_BLACK_FRIDAY: 18/04/2022 09:00:00
+      START_DATE_BLACK_FRIDAY: 10/04/2022 18:00:00
+      END_DATE_BLACK_FRIDAY: 27/04/2022 18:00:00
       DISCOUNT_SERVICE_URL: discount-service:50051
     ports:
       - "4040:4040"

@@ -54,6 +54,10 @@ func main() {
 		log.Fatalf("invalid end date format: %v", err)
 	}
 
+	if blackFridayStart.After(blackFridayEnd) {
+		log.Fatal("black friday start date must be before of the end date")
+	}
+
 	checkoutService := product.NewCheckoutService(discountClient, productStorage, funcNow, blackFridayStart, blackFridayEnd, log)
 
 	// HTTP server
