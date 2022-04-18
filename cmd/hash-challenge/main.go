@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/matheussbaraglini/hash-challenge/internal/domain/product"
+	"github.com/matheussbaraglini/hash-challenge/internal/infrastructure/client"
 	"github.com/matheussbaraglini/hash-challenge/internal/infrastructure/server/http"
 	"github.com/matheussbaraglini/hash-challenge/internal/infrastructure/storage/memory"
 	"github.com/matheussbaraglini/hash-challenge/pkg/env"
@@ -15,10 +16,11 @@ import (
 const (
 	dateLayout                 = "02/01/2006 15:04:05"
 	envVarServerPort           = "SERVER_PORT"
+	envVarDiscountServiceURL   = "DISCOUNT_SERVICE_URL"
 	envVarStartDateBlackFriday = "START_DATE_BLACK_FRIDAY"
 	envVarEndDateBlackFriday   = "END_DATE_BLACK_FRIDAY"
 
-	defaultPort = "5001"
+	defaultPort = "4040"
 )
 
 func main() {
@@ -33,6 +35,9 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	// Clients
+	discountClient := client.NewDiscountClient(getDiscountServiceURL())
 
 	// Service
 	funcNow := func() time.Time {
@@ -49,7 +54,7 @@ func main() {
 		log.Fatalf("invalid end date format: %v", err)
 	}
 
-	checkoutService := product.NewCheckoutService(productStorage, funcNow, blackFridayStart, blackFridayEnd, log)
+	checkoutService := product.NewCheckoutService(discountClient, productStorage, funcNow, blackFridayStart, blackFridayEnd, log)
 
 	// HTTP server
 	handler := http.NewHandler(checkoutService)
@@ -87,4 +92,8 @@ func getStartDateBlackFriday() string {
 
 func getEndDateBlackFriday() string {
 	return env.GetString(envVarEndDateBlackFriday)
+}
+
+func getDiscountServiceURL() string {
+	return env.GetString(envVarDiscountServiceURL)
 }

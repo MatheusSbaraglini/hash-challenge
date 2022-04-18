@@ -15,9 +15,9 @@ COPY . .
 # ---- Build ----
 FROM source as build
 RUN CGO_ENABLED=0 GOOS=linux \
-    go build -v -a -o ./hash-challenge \
-    ./cmd/hash-challenge/main.go
+    go build -v -a -o ./discount-service \
+    ./third_party/main.go
 
 # ---- Running ----
 FROM build as run
-CMD ["./hash-challenge"]
+CMD ["./discount-service"]
