@@ -10,6 +10,7 @@ import (
 )
 
 type service struct {
+	discountClient   domain.DiscountClient
 	productStorage   domain.ProductStorage
 	funcNow          func() time.Time
 	blackFridayStart time.Time
@@ -17,8 +18,9 @@ type service struct {
 	log              *log.Logger
 }
 
-func NewCheckoutService(productStorage domain.ProductStorage, funcNow func() time.Time, blackFridayStart time.Time, blackfridayEnd time.Time, log *log.Logger) domain.CheckoutService {
+func NewCheckoutService(discountClient domain.DiscountClient, productStorage domain.ProductStorage, funcNow func() time.Time, blackFridayStart time.Time, blackfridayEnd time.Time, log *log.Logger) domain.CheckoutService {
 	return &service{
+		discountClient:   discountClient,
 		productStorage:   productStorage,
 		funcNow:          funcNow,
 		blackFridayStart: blackFridayStart,
@@ -55,13 +57,16 @@ func (s *service) AddProducts(ctx context.Context, products *domain.ProductInput
 			IsGift:      false,
 		}
 
-		// TODO: calc discount
+		discountPercentage, err := s.discountClient.GetDiscountProductPercentage(ctx, inputProduct.ID)
+		if err != nil {
+			s.log.Printf("discount client could not return the product percentage: %v", err)
+		}
+
+		checkoutProduct.Discount = int((float32(checkoutProduct.TotalAmount) * (discountPercentage / 100)))
 
 		checkout.Products = append(checkout.Products, checkoutProduct)
 	}
 
-	// check if it is black friday and add a gift
-	// TODO: calc black friday
 	if s.isBlackFriday() {
 		gift, err := s.getProductGift(ctx)
 		if err != nil {
@@ -78,7 +83,7 @@ func (s *service) AddProducts(ctx context.Context, products *domain.ProductInput
 	return checkout, nil
 }
 
-func(s *service) isBlackFriday() bool {
+func (s *service) isBlackFriday() bool {
 	now := s.funcNow()
 
 	if now.After(s.blackFridayStart) && now.Before(s.blackfridayEnd) {
