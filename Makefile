@@ -1,4 +1,4 @@
-.PHONY: test run-all-local-logs run-all-local stop-discount-service start-discount-service down-all-local
+.PHONY: test run-all-local stop-discount-service start-discount-service down-all-local
 
 test:
 	- docker build --progress=plain \
